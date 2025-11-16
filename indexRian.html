@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rian · Prompt Community (Full + Prompt-Grid Redesign)</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --text: #e6f1ff;
+      --muted: #98a2b3;
+      --accent: #7c3aed;
+      --accent2: #22d3ee;
+      --panel: #0f1722;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .3);
+      --border: rgba(255, 255, 255, .08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background:
+        radial-gradient(800px 700px at 30% -10%, rgba(124, 58, 237, .12), transparent),
+        radial-gradient(800px 600px at 70% 0%, rgba(34, 211, 238, .12), transparent),
+        linear-gradient(180deg, #0b0f14, #0f1622);
+      font-family: Pretendard, -apple-system, sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: linear-gradient(to bottom, rgba(10, 14, 20, .92), rgba(10, 14, 20, .7));
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      height: 72px; max-width: 1260px; margin: 0 auto; padding: 0 28px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .brand { font-weight: 800; font-size: 24px; color: var(--text); text-decoration: none; }
+    .auth { display: flex; gap: 12px; }
+
+    .btn {
+      border: 1px solid var(--border); background: #1b2233; color: var(--text);
+      padding: 10px 18px; border-radius: 999px; cursor: pointer;
+      transition: transform .2s ease, box-shadow .25s ease;
+    }
+    .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); border-color: transparent; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
+
+    .hero { text-align: center; padding: 120px 20px 50px; }
+    .hero-title { font-size: 66px; font-weight: 700; min-height: 84px; margin-bottom: 20px; }
+    .cursor { display: inline-block; width: 3px; background: var(--accent2); margin-left: 4px; animation: blink 1s steps(2) infinite; }
+    @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+    .hero-sub { color: var(--muted); margin: 10px 0 24px; }
+
+    .prompt-bar {
+      display: grid; grid-template-columns: 1fr auto; gap: 10px; max-width: 740px;
+      margin: 0 auto 28px; padding: 8px; background: rgba(255,255,255,.05);
+      border: 1px solid var(--border); border-radius: 999px;
+    }
+    .prompt-bar input { background: transparent; border: 0; outline: none; color: var(--text); padding: 14px 18px; font-size: 17px; }
+    .role-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+
+    .brand-mini { overflow: hidden; max-width: 640px; margin: 40px auto; }
+    .mini-track { display: flex; gap: 40px; white-space: nowrap; animation: miniSlide 20s linear infinite; }
+    .mini-track span { font-weight: 600; color: var(--muted); font-size: 18px; opacity: .9; }
+    @keyframes miniSlide { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    .section { padding: 80px 28px; }
+    .section-title { text-align: center; font-size: 34px; margin: 0 0 36px; }
+
+    .scroll-gallery { display: flex; gap: 28px; overflow-x: auto; scrollbar-width: none; padding: 0 10px; scroll-behavior: smooth; cursor: grab; }
+    .scroll-gallery::-webkit-scrollbar { display: none; }
+
+    .card { min-width: 360px; flex-shrink: 0; background: #111a2b; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform .35s ease, box-shadow .35s ease; }
+    .card img { width: 100%; height: 320px; object-fit: cover; display: block; }
+    .card:hover { transform: scale(1.05); box-shadow: 0 26px 80px rgba(0,0,0,.55); border-color: var(--accent); }
+    .caption { padding: 12px 16px; color: var(--muted); font-size: 17px; }
+
+    /* === SUNO STYLE MUSIC BOARD === */
+    #suno-board { padding: 100px 40px; text-align: center; }
+    #suno-board .section-title { font-size: 42px; font-weight: 700; color: #fff; margin-bottom: 60px; }
+    .music-grid { display: flex; gap: 28px; justify-content: center; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; white-space: nowrap; align-items: flex-start; }
+    .music-grid::-webkit-scrollbar { display: none; }
+
+    .music-card { width: 260px; background: linear-gradient(180deg, var(--panel)); border-radius: 16px; overflow: hidden; flex-shrink: 0; box-shadow: 0 8px 20px rgba(0,0,0,.4); transition: transform .3s ease; }
+    .music-card:hover { transform: translateY(-6px); }
+
+    .music-thumb { position: relative; width: 100%; aspect-ratio: 3 / 4.2; overflow: hidden; }
+    .music-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+    .music-card:hover .music-thumb img { transform: scale(1.04); }
+
+    .music-thumb .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.6), transparent 70%); display: flex; flex-direction: column; justify-content: space-between; padding: 10px; opacity: 0; transition: opacity .25s ease; }
+    .music-thumb:hover .overlay { opacity: 1; }
+
+    .play-btn { background: none; border: none; width: 32px; height: 32px; font-size: 18px; color: #fff; align-self: flex-start; cursor: pointer; opacity: .85; transition: transform .2s ease, opacity .2s ease; }
+    .play-btn:hover { opacity: 1; transform: scale(1.1); }
+
+    .stats { display: flex; justify-content: space-between; color: #ccc; font-size: 13px; background: rgba(0,0,0,.4); border-radius: 10px; padding: 4px 8px; }
+
+    .music-info { padding: 14px; text-align: left; }
+    .music-info .title { color: #fff; font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .music-info .artist { color: #888; font-size: 13px; }
+
+    /* ========================= PROMPT-GRID REDESIGN ========================= */
+    .prompt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; max-width: 1680px; margin: 0 auto; justify-items: center; }
+    .prompt-grid .card { width: 520px; background: linear-gradient(180deg, var(--panel), rgba(255,255,255,.02)); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; min-width: unset; }
+    .prompt-grid .card:hover { transform: translateY(-4px); box-shadow: 0 26px 80px rgba(0,0,0,.55); border-color: var(--accent); cursor: pointer;}
+    .prompt-grid .card-media { aspect-ratio: 16 / 9; background: linear-gradient(120deg, rgba(255,255,255,.08), transparent); display: grid; place-items: center; overflow: hidden; }
+    .prompt-grid .card-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .prompt-grid .card-body { padding: 14px 16px 8px; }
+    .prompt-grid .card-title { font-weight: 700; margin-bottom: 6px; }
+    .prompt-grid .card-desc { color: var(--muted); line-height: 1.5; font-size: 15px; }
+    .prompt-grid .card-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 16px; }
+    .prompt-grid .tag { font-size: 12px; color: var(--muted); padding: 6px 10px; border-radius: 999px; border: 1px dashed var(--border); }
+
+    @media (max-width: 1400px) {
+      .prompt-grid { grid-template-columns: repeat(2, 1fr); max-width: 100%; }
+      .prompt-grid .card { width: 460px; height: auto; }
+    }
+
+    /* === MIDJOURNEY VERTICAL BOARD === */
+    #midjourney-board { padding: 100px 40px; text-align: center; }
+    #midjourney-board .section-title { font-size: 42px; font-weight: 700; color: #fff; margin-bottom: 60px; }
+    .vertical-gallery { display: flex; gap: 24px; justify-content: center; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; padding: 10px; }
+    .vertical-gallery::-webkit-scrollbar { display: none; }
+    .vertical-card { width: 260px; background: linear-gradient(180deg, var(--panel)); border-radius: 22px; overflow: hidden; flex-shrink: 0; box-shadow: 0 8px 24px rgba(0,0,0,.4); transition: transform .3s ease, box-shadow .3s ease; }
+    .vertical-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,.55); }
+    .video-thumb { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; border-radius: 20px; }
+    .video-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+    .vertical-card:hover .video-thumb img { transform: scale(1.05); }
+    .creator { color: #ccc; font-size: 14px; text-align: left; padding: 10px 12px 16px; }
+
+    .apps { padding: 40px 28px; }
+    .apps .wrap { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .app { display: flex; align-items: center; gap: 14px; padding: 20px; background: #0f1725; border: 1px solid var(--border); border-radius: 18px; }
+    .app strong { margin-right: auto; font-size: 18px; }
+    .app span, .app small { color: var(--muted); }
+
+    .signup-section { text-align: center; padding: 50px 0 30px; }
+    .signup-section .btn.primary { font-size: 18px; padding: 14px 44px; }
+
+    footer { border-top: 1px solid var(--border); background: #0a0f17; padding: 60px 28px 40px; margin-top: 0; text-align: center; }
+    .footer-inner { max-width: 1260px; margin: 0 auto; }
+    .footer-brand { font-size: 28px; font-weight: 800; background: linear-gradient(90deg, #ff7a59, #8c65f7, #22d3ee, #ff7a59); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: aurora 6s linear infinite; display: inline-block; margin-bottom: 16px; }
+    @keyframes aurora { 0%{background-position:0% 50%} 100%{background-position:100% 50%} }
+    .footer-cols { display: flex; justify-content: center; gap: 80px; margin-top: 30px; flex-wrap: wrap; color: var(--muted); }
+    .footer-cols ul { list-style: none; }
+    .footer-cols h4 { color: var(--text); margin-bottom: 12px; }
+    .footer-cols li { margin: 6px 0; }
+    .footer-cols a { color: var(--muted); text-decoration: none; }
+    .footer-cols a:hover { color: var(--text); }
+    .community { margin-top: 30px; display: flex; justify-content: center; gap: 20px; }
+    .community a { color: var(--muted); text-decoration: none; font-size: 18px; }
+    .community a:hover { color: var(--text); }
+    .copy { color: var(--muted); margin-top: 20px; font-size: 14px; }
+
+    /* === Scroll Reveal === */
+    .reveal-init { opacity: 0; transform: translateY(60px); will-change: transform, opacity; }
+    .reveal-in { opacity: 1; transform: translateY(0); transition: opacity 1s ease-out, transform 1s cubic-bezier(0.17,0.55,0.55,1); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="#">Rian</a>
+      <div class="auth">
+        <a href="./html/main.html">
+        <button class="btn">Sign In</button>
+        </a>
+        <button class="btn primary">Sign Up</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1 class="hero-title" id="typed-text"></h1><span class="cursor"></span>
+    <p class="hero-sub">프롬프트를 입력하고 AI 모델에 맞는 형태로 자동 가공해보세요.</p>
+    <form class="prompt-bar" onsubmit="return false;">
+      <input type="text" placeholder="당신의 아이디어를 입력하세요" />
+      <button class="btn">Create</button>
+    </form>
+    <div class="role-buttons">
+      <button class="btn">프론트엔드 엔지니어</button>
+      <button class="btn">싱어송라이터</button>
+      <button class="btn">일러스트레이터</button>
+    </div>
+    <div class="brand-mini">
+      <div class="mini-track">
+        <span>ChatGPT</span><span>Gemini</span><span>Claude</span><span>Suno</span><span>Midjourney</span><span>Kling</span>
+        <span>ChatGPT</span><span>Gemini</span><span>Claude</span><span>Suno</span><span>Midjourney</span><span>Kling</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUNO: Music Board -->
+  <section class="section reveal-init" id="suno-board">
+    <h2 class="section-title">리안 프롬프트로 만든 AI 음원</h2>
+    <div class="music-grid" id="music-board">
+      <article class="music-card">
+        <div class="music-thumb">
+          <img src="assets/music1.jpg" alt="Muse" />
+          <div class="overlay">
+            <button class="play-btn" data-state="play">▶</button>
+            <div class="stats"><span>▶ 5.4K</span><span>♥ 169</span></div>
+          </div>
+        </div>
+        <div class="music-info"><h3 class="title">Muse</h3><p class="artist">@sonoa</p></div>
+      </article>
+      <article class="music-card">
+        <div class="music-thumb">
+          <img src="assets/music2.jpg" alt="I am in - I am out EDM" />
+          <div class="overlay">
+            <button class="play-btn" data-state="play">▶</button>
+            <div class="stats"><span>▶ 26K</span><span>♥ 937</span></div>
+          </div>
+        </div>
+        <div class="music-info"><h3 class="title">I am in - I am out EDM</h3><p class="artist">@EUMAK4U</p></div>
+      </article>
+      <article class="music-card">
+        <div class="music-thumb">
+          <img src="assets/music3.jpg" alt="passing by" />
+          <div class="overlay">
+            <button class="play-btn" data-state="play">▶</button>
+            <div class="stats"><span>▶ 5.5K</span><span>♥ 487</span></div>
+          </div>
+        </div>
+        <div class="music-info"><h3 class="title">passing by</h3><p class="artist">@bleeder</p></div>
+      </article>
+      <article class="music-card">
+        <div class="music-thumb">
+          <img src="assets/music4.jpg" alt="Delapidated (Cover)" />
+          <div class="overlay">
+            <button class="play-btn" data-state="play">▶</button>
+            <div class="stats"><span>▶ 37K</span><span>♥ 899</span></div>
+          </div>
+        </div>
+        <div class="music-info"><h3 class="title">Delapidated (Cover)</h3><p class="artist">@DeeBeettZZ</p></div>
+      </article>
+      <article class="music-card">
+        <div class="music-thumb">
+          <img src="assets/music5.jpg" alt="almost home" />
+          <div class="overlay">
+            <button class="play-btn" data-state="play">▶</button>
+            <div class="stats"><span>▶ 21K</span><span>♥ 750</span></div>
+          </div>
+        </div>
+        <div class="music-info"><h3 class="title">almost home</h3><p class="artist">@MakingMusicIsLife</p></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Prompt Grid Section -->
+  <section class="section reveal-init">
+    <h2 class="section-title">너는 여기에서 무엇이든 할 수 있어.</h2>
+    <div class="prompt-grid">
+      <article class="card" data-tags="chatgpt">
+        <div class="card-media"><img src="./img/OpenAI.png" alt="ChatGPT" /></div>
+        <div class="card-body"><h3 class="card-title">ChatGPT 프롬프트</h3><p class="card-desc">대화형 모델 최적화 프롬프트 예시 모음.</p></div>
+        <div class="card-tags"><span class="tag">#chatgpt</span><span class="tag">#text</span></div>
+      </article>
+      <article class="card" data-tags="claude">
+        <div class="card-media"><img src="./img/클로드.png" alt="Claude" /></div>
+        <div class="card-body"><h3 class="card-title">Claude 프롬프트</h3><p class="card-desc">분석·장문 중심의 작성 스타일에 맞춘 프롬프트.</p></div>
+        <div class="card-tags"><span class="tag">#claude</span><span class="tag">#analysis</span></div>
+      </article>
+      <article class="card" data-tags="gemini">
+        <div class="card-media"><img src="./img/제미나이.png" alt="Gemini" /></div>
+        <div class="card-body"><h3 class="card-title">Gemini 프롬프트</h3><p class="card-desc">멀티모달 입력(이미지+텍스트) 대응 템플릿.</p></div>
+        <div class="card-tags"><span class="tag">#gemini</span><span class="tag">#multi</span></div>
+      </article>
+      <article class="card" data-tags="suno">
+        <div class="card-media"><img src="./img/수노.png" alt="Suno" /></div>
+        <div class="card-body"><h3 class="card-title">Suno 프롬프트</h3><p class="card-desc">음악 생성용 감성 키워드와 구조화 템플릿.</p></div>
+        <div class="card-tags"><span class="tag">#suno</span><span class="tag">#music</span></div>
+      </article>
+      <article class="card" data-tags="midjourney">
+        <div class="card-media"><img src="./img/미드저니.jpg" alt="Midjourney" /></div>
+        <div class="card-body"><h3 class="card-title">Midjourney 프롬프트</h3><p class="card-desc">스타일/라이팅/렌즈 파라미터 구성 가이드.</p></div>
+        <div class="card-tags"><span class="tag">#midjourney</span><span class="tag">#visual</span></div>
+      </article>
+      <article class="card" data-tags="kling">
+        <div class="card-media"><img src="./img/클링.png" alt="Kling" /></div>
+        <div class="card-body"><h3 class="card-title">Kling 프롬프트</h3><p class="card-desc">비디오 시퀀스 기반 생성 프롬프트 샘플.</p></div>
+        <div class="card-tags"><span class="tag">#kling</span><span class="tag">#video</span></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Midjourney: Vertical Image Board -->
+  <section class="section reveal-init" id="midjourney-board">
+    <h2 class="section-title">Midjourney에서 생성된 이미지 보드</h2>
+    <div class="vertical-gallery" id="image-board">
+      <article class="vertical-card"><div class="video-thumb"><img src="assets/image1.jpg" alt="image1" /></div><p class="creator">@artist_one</p></article>
+      <article class="vertical-card"><div class="video-thumb"><img src="assets/image2.jpg" alt="image2" /></div><p class="creator">@visual_lab</p></article>
+      <article class="vertical-card"><div class="video-thumb"><img src="assets/image3.jpg" alt="image3" /></div><p class="creator">@mid_journeyer</p></article>
+      <article class="vertical-card"><div class="video-thumb"><img src="assets/image4.jpg" alt="image4" /></div><p class="creator">@dreamstudio</p></article>
+      <article class="vertical-card"><div class="video-thumb"><img src="assets/image5.jpg" alt="image5" /></div><p class="creator">@mjartist</p></article>
+    </div>
+  </section>
+
+  <section class="apps reveal-init">
+    <div class="wrap">
+      <div class="app"><strong>Top 10</strong><span>4.9 ★</span><small>363k+ 리뷰</small><button class="btn">iPhone에서 받기</button></div>
+      <div class="app"><strong>Top 10</strong><span>4.8 ★</span><small>653k+ 리뷰</small><button class="btn">Android에서 받기</button></div>
+    </div>
+  </section>
+
+  <section class="signup-section reveal-init">
+    <button class="btn primary">회원가입</button>
+  </section>
+
+  <footer class="reveal-init">
+    <div class="footer-inner">
+      <a href="./indexRian.html">
+      <div class="footer-brand">Rian</div>
+      </a>
+      <p>프롬프트 메이커들의 커뮤니티, AI 창작의 중심에 있습니다.</p>
+      <div class="footer-cols">
+        <div>
+          <h4>Brand</h4>
+          <ul>
+            <li><a href="#">소개</a></li>
+            <li><a href="#">채용</a></li>
+            <li><a href="#">블로그</a></li>
+            <li><a href="#">가격</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">도움말</a></li>
+            <li><a href="#">문의</a></li>
+            <li><a href="#">가이드라인</a></li>
+            <li><a href="#">개인정보 처리방침</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="community"><a href="#">Twitter</a><a href="#">Discord</a><a href="#">Instagram</a><a href="#">GitHub</a></div>
+      <p class="copy">© 2025 Rian Inc. · Made with ❤️ by Rian Team</p>
+    </div>
+  </footer>
+
+  <script>
+    // Typing effect
+    const el = document.getElementById('typed-text');
+    const phrases = [
+      "ChatGPT · Gemini · Claude 최적화 프롬프트",
+      "AI 프롬프트를 더 스마트하게",
+      "당신의 아이디어를 현실로"
+    ];
+    let i = 0, j = 0, deleting = false;
+    function tick() {
+      const current = phrases[i % phrases.length];
+      if (!deleting) {
+        el.textContent = current.slice(0, ++j);
+        if (j === current.length) { deleting = true; setTimeout(tick, 1200); return; }
+      } else {
+        el.textContent = current.slice(0, --j);
+        if (j === 0) { deleting = false; i++; }
+      }
+      setTimeout(tick, deleting ? 40 : 70);
+    }
+    tick();
+
+    // Infinite scroll (music & image boards)
+    function makeInfiniteScroll(selector) {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      const items = [...el.children];
+      items.forEach(c => el.appendChild(c.cloneNode(true)));
+      const half = Math.floor(el.scrollWidth / 2);
+      el.scrollLeft = half;
+      el.addEventListener('wheel', e => { e.preventDefault(); el.scrollLeft += e.deltaY || e.deltaX; loopCheck(); }, { passive: false });
+      let isDown = false, startX, startLeft;
+      el.addEventListener('mousedown', e => { isDown = true; startX = e.pageX; startLeft = el.scrollLeft; });
+      window.addEventListener('mouseup', () => isDown = false);
+      window.addEventListener('mousemove', e => { if (!isDown) return; const dx = e.pageX - startX; el.scrollLeft = startLeft - dx; loopCheck(); });
+      function loopCheck() { const max = el.scrollWidth / 2; if (el.scrollLeft <= 0) el.scrollLeft += max; if (el.scrollLeft >= max * 2) el.scrollLeft -= max; }
+      window.addEventListener('resize', () => el.scrollLeft = half);
+    }
+    makeInfiniteScroll('#music-board');
+    makeInfiniteScroll('#image-board');
+
+    // Play/Pause toggle (icon only)
+    document.querySelectorAll('.play-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const state = btn.getAttribute('data-state');
+        if (state === 'play') { btn.textContent = '❚❚'; btn.setAttribute('data-state', 'pause'); }
+        else { btn.textContent = '▶'; btn.setAttribute('data-state', 'play'); }
+      });
+    });
+
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.reveal-init');
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('reveal-in'); obs.unobserve(entry.target); } });
+    }, { threshold: 0.2 });
+    revealEls.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
