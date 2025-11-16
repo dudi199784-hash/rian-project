@@ -421,34 +421,37 @@ async function handleSend() {
     revealEls.forEach(el => observer.observe(el));
   </script>
 
-<!-- ChatKit 로드 -->
-<script
-  src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"
-></script>
+<!-- 1) ChatKit 먼저 로드 -->
+<script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
 
-<!-- ChatKit 초기화 -->
+<!-- 2) ChatKit 로드 후 초기화 -->
 <script>
-const chat = new ChatKit({
-    domain: "dudi199784-hash.github.io",
-    publicKey: "domain_pk_6919af7eedd481959663e4ca01fd496a0d6733c65161f49f"
+window.addEventListener("load", () => {
+
+    // ChatKit 로드 확인 (디버깅용)
+    console.log("ChatKit loaded?", typeof ChatKit);
+
+    const chat = new ChatKit({
+        domain: "dudi199784-hash.github.io",
+        publicKey: "domain_pk_6919af7eedd481959663e4ca01fd496a0d6733c65161f49f"
+    });
+
+    window.sendToAgent = async function(userMessage) {
+        try {
+            const response = await chat.runWorkflow({
+                workflowId: "wf_6919a9f5fe648190a32005f7b0ef106408d8932bcc9912c1",
+                version: "draft",
+                input: { message: userMessage }
+            });
+            return response.output;
+        } catch (err) {
+            console.error(err);
+            return "❌ 오류 발생 (콘솔 확인)";
+        }
+    };
 });
-
-async function sendToAgent(userMessage) {
-    try {
-        const response = await chat.runWorkflow({
-            workflowId: "wf_6919a9f5fe648190a32005f7b0ef106408d8932bcc9912c1",
-            version: "draft",
-            input: { message: userMessage }
-        });
-
-        console.log("Agent response:", response.output);
-        return response.output;
-    } catch (err) {
-        console.error(err);
-        return "❌ 오류 발생: 콘솔 확인 필요";
-    }
-}
 </script>
 </body>
 </html>
+
 
